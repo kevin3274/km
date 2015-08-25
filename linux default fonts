@@ -1,0 +1,46 @@
+从windows复制字段到linux
+1、先从你本机 C:\Windows\Fonts 拷贝或者网络上下载你想要安装的字体文件（*.ttf文件）到 /usr/share/fonts/chinese/TrueType 目录下（如果系统中没有此目录，则自行mkdir创建，亦可重命名为自己喜欢的文件夹名）
+2、修改字体文件的权限，使root用户以外的用户也可以使用
+# cd /usr/share/fonts/chinese/TrueType
+# chmod 755 *.ttf
+3、建立字体缓存
+# mkfontscale （如果提示 mkfontscale: command not found，需自行安装 # yum install mkfontscale ）
+# mkfontdir 
+# fc-cache -fv （如果提示 fc-cache: command not found，则需要安装# yum install fontconfig ）
+
+字体的默认目录存放于/usr/share/fonts下面，此目录下的任务子目录都会被scan到ttf,ttc等字体文件
+
+可以通过
+fc-match
+查看默认字体
+西方国家字母体系分为两类：serif 以及sans serif。
+serif 是有衬线字体，意思是在字的笔画开始、结束的地方有额外的装饰，而且笔画的粗细会有所不同。相反的，sans serif 就没有这些额外的装饰，而且笔画的粗细差不多。
+serif 字体容易识别，它强调了每个字母笔画的开始和结束，因此易读性比较高，sans serif 则比较醒目。在中文阅读的情况下，适合使用 serif 字体（如宋体）进行排版，易于换行阅读的识别性，避免发生行间的阅读错误。
+
+
+修改默认字体
+sudo vi /etc/fonts/conf.avail/69-language-selector-zh-cn.conf
+该文件记录着不同种类字体查找使用的优先顺序，如serif类字段的查找优先顺序
+      <match target="pattern">
+        <test name="lang">
+            <string>zh-cn</string>
+        </test>
+                <test qual="any" name="family">
+                        <string>serif</string>
+                </test>
+                <edit name="family" mode="prepend" binding="strong">
+                        <string>SimSun</string>
+                        <string>HYSong</string>
+                        <string>AR PL UMing CN</string>
+                        <string>AR PL UMing HK</string>
+                        <string>AR PL New Sung</string>
+                        <string>WenQuanYi Bitmap Song</string>
+                        <string>AR PL UKai CN</string>
+                        <string>AR PL ZenKai Uni</string>
+                </edit>
+        </match>
+        
+保存后即可使用fc-match serif 测试，如果正确显示为宋体表示成功
+
+
+
